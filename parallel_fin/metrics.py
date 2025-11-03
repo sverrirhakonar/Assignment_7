@@ -5,6 +5,8 @@ import psutil
 import polars as pl
 import matplotlib.pyplot as plt
 from parallel_fin import data_loader
+from typing import Dict
+
 
 def profile_resources(func):
     """
@@ -53,6 +55,8 @@ def compute_rolling_pandas(df: pd.DataFrame, window: int = 20) -> pd.DataFrame:
     # Percent returns per symbol
     df["return"] = df.groupby("symbol")["price"].pct_change()
 
+    df["ret_vol20"] = df.groupby("symbol")["return"].transform(lambda x: x.rolling(window).std())
+
     # Rolling calculations per symbol
     df["ma20"] = df.groupby("symbol")["price"].transform(
         lambda x: x.rolling(window).mean()
@@ -65,6 +69,8 @@ def compute_rolling_pandas(df: pd.DataFrame, window: int = 20) -> pd.DataFrame:
         .transform(lambda x: x.rolling(window).mean() / x.rolling(window).std())
         .replace([np.inf, -np.inf], np.nan)
     )
+
+
 
     return df
 
@@ -80,6 +86,11 @@ def compute_rolling_polars(df: pl.DataFrame, window: int = 20) -> pl.DataFrame:
     df = df.with_columns(
         (pl.col("price").pct_change().over("symbol")).alias("return")
     )
+
+    df = df.with_columns(
+        pl.col("return").rolling_std(window_size=window).over("symbol").alias("ret_vol20")
+    )
+
 
     # Rolling mean and std for price per symbol
     df = df.with_columns([
@@ -157,3 +168,26 @@ def compare_rolling_performance(csv_path: str, window: int = 20, symbol: str = "
     plt.show()
 
     return summary
+
+def pct_returns(prices: pd.Series) -> pd.Series:
+    s = prices.sort_index().astype(float)
+    return s.pct_change().dropna()
+
+def rolling_return_volatility(prices: pd.Series, window: int = 20) -> float:
+    r = pct_returns(prices)
+    if len(r) >= window:
+        return float(r.rolling(window).std(ddof=1).iloc[-1])
+    return float(r.std(ddof=1)) if len(r) >= 2 else float("nan")
+
+def max_drawdown(prices: pd.Series) -> float:
+    p = prices.sort_index().astype(float)
+    if p.empty:
+        return float("nan")
+    dd = p / p.cummax() - 1.0
+    return float(dd.min())
+
+def build_symbol_price_map_pandas(df: pd.DataFrame) -> Dict[str, pd.Series]:
+    x = df.copy()
+    if "timestamp" in x.columns:
+        x = x.sort_values("timestamp").set_index("timestamp")
+    return {sym: g["price"].astype(float) for sym, g in x.groupby("symbol")}
