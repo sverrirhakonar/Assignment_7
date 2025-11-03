@@ -1,0 +1,50 @@
+{
+    "ingestion": {
+        "pandas": {
+            "time_sec": 0.491,
+            "mem_diff_mb": 10.375,
+            "cpu_percent": 18.75
+        },
+        "polars": {
+            "time_sec": 0.1291,
+            "mem_diff_mb": 39.8281,
+            "cpu_percent": 32.6
+        }
+    },
+    "rolling": {
+        "pandas": {
+            "time_sec": 0.1788,
+            "mem_diff_mb": 13.5742,
+            "cpu_percent": 0.0
+        },
+        "polars": {
+            "time_sec": 0.0357,
+            "mem_diff_mb": 47.7344,
+            "cpu_percent": 0.0
+        }
+    },
+    "parallel": {
+        "pandas_thread": {
+            "time_sec": 0.0953,
+            "mem_diff_mb": 15.6523,
+            "cpu_percent": 0.0
+        },
+        "pandas_multiprocess": {
+            "time_sec": 1.2254,
+            "mem_diff_mb": 16.6914,
+            "cpu_percent": 0.0
+        }
+    },
+    "portfolio": {
+        "sequential": {
+            "time_sec": 2.2753,
+            "mem_diff_mb": 21.9453,
+            "cpu_percent": 19.25
+        },
+        "multiprocess": {
+            "time_sec": 2.3863,
+            "mem_diff_mb": 1.5469,
+            "cpu_percent": 0.0
+        }
+    }
+}
