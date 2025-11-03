@@ -107,3 +107,8 @@ python main.py
 ## 📝 License
 
 This project is part of an academic assignment.
+
+### References:
+
+1. ChatGPT 5, used for coding and other general help
+2. Course slides.
